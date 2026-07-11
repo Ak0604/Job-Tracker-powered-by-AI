@@ -3,605 +3,366 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
-const N_COLORS = {
-  navy: '#0a1530',
-  navyMid: '#1a2a52',
-  primary: '#5645d4',
-  primaryDeep: '#3a2a99',
-  canvas: '#ffffff',
-  surface: '#f6f5f4',
-  surfaceSoft: '#fafaf9',
-  hairline: '#e5e3df',
-  hairlineStrong: '#c8c4be',
-  ink: '#1a1a1a',
-  charcoal: '#37352f',
-  slate: '#5d5b54',
-  steel: '#787671',
-  stone: '#a4a097',
-  onDark: '#ffffff',
-  onDarkMuted: '#a4a097',
-  peach: '#ffe8d4',
-  rose: '#fde0ec',
-  mint: '#d9f3e1',
-  lavender: '#e6e0f5',
-  sky: '#dcecfa',
-  yellow: '#fef7d6',
-  yellowBold: '#f9e79f',
-  brandGreen: '#1aae39',
-  brandOrange: '#dd5b00',
-  brandYellow: '#f5d75e',
-  brandPink: '#ff64c8',
-  brandTeal: '#2a9d99',
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const T = {
+  canvas:         '#010102',
+  s1:             '#0f1011',
+  s2:             '#141516',
+  s3:             '#18191a',
+  hairline:       '#23252a',
+  hairlineStrong: '#34343a',
+  ink:            '#f7f8f8',
+  inkMuted:       '#d0d6e0',
+  inkSubtle:      '#8a8f98',
+  inkTertiary:    '#62666d',
+  accent:         '#5e6ad2',
+  accentHover:    '#828fff',
+  success:        '#27a644',
 };
 
-const styles = {
-  root: {
-    fontFamily: "'Inter', system-ui, sans-serif",
-    background: N_COLORS.canvas,
-    color: N_COLORS.ink,
-    overflowX: 'hidden',
-    margin: 0,
-    padding: 0,
-  },
-  // NAV
-  nav: {
-    position: 'sticky',
-    top: 0,
-    zIndex: 100,
-    background: 'rgba(255,255,255,0.95)',
-    backdropFilter: 'blur(8px)',
-    borderBottom: `1px solid ${N_COLORS.hairline}`,
-    height: 60,
-    display: 'flex',
-    alignItems: 'center',
-    padding: '0 32px',
-    gap: 0,
-  },
-  navLogo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    fontWeight: 700,
-    fontSize: 16,
-    color: N_COLORS.ink,
-    textDecoration: 'none',
-    marginRight: 32,
-    cursor: 'pointer',
-  },
-  navLogoIcon: {
-    width: 28,
-    height: 28,
-    background: N_COLORS.ink,
-    borderRadius: 6,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: '#fff',
-    fontWeight: 800,
-    fontSize: 13,
-  },
-  navLinks: { display: 'flex', gap: 4, flex: 1 },
-  navLink: {
-    fontSize: 13,
-    color: N_COLORS.slate,
-    textDecoration: 'none',
-    padding: '6px 10px',
-    borderRadius: 6,
-    cursor: 'pointer',
-    background: 'transparent',
-    border: 'none',
-  },
-  navRight: { display: 'flex', alignItems: 'center', gap: 8 },
-  btnGhost: {
-    fontSize: 13,
-    color: N_COLORS.ink,
-    background: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    padding: '6px 12px',
-    borderRadius: 8,
-  },
-  btnPrimary: {
-    fontSize: 13,
-    fontWeight: 500,
-    color: '#fff',
-    background: N_COLORS.primary,
-    border: 'none',
-    cursor: 'pointer',
-    padding: '8px 16px',
-    borderRadius: 8,
-  },
-  // HERO
-  hero: {
-    background: N_COLORS.navy,
-    color: N_COLORS.onDark,
-    padding: '100px 32px 0',
-    textAlign: 'center',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  heroBadge: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 6,
-    background: 'rgba(255,255,255,0.1)',
-    border: '1px solid rgba(255,255,255,0.15)',
-    borderRadius: 9999,
-    padding: '5px 14px',
-    fontSize: 12,
-    fontWeight: 600,
-    color: N_COLORS.onDark,
-    marginBottom: 28,
-    letterSpacing: '0.5px',
-  },
-  heroBadgeDot: { width: 6, height: 6, background: N_COLORS.brandGreen, borderRadius: '50%' },
-  heroTitle: {
-    fontSize: 'clamp(36px,6vw,72px)',
-    fontWeight: 600,
-    lineHeight: 1.05,
-    letterSpacing: '-2px',
-    marginBottom: 24,
-    maxWidth: 760,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-  },
-  heroTitleAccent: { color: N_COLORS.brandYellow },
-  heroSub: {
-    fontSize: 18,
-    color: N_COLORS.onDarkMuted,
-    lineHeight: 1.6,
-    maxWidth: 520,
-    margin: '0 auto 40px',
-  },
-  heroBtns: { display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 64 },
-  btnHeroPrimary: {
-    fontSize: 14,
-    fontWeight: 500,
-    color: '#fff',
-    background: N_COLORS.primary,
-    border: 'none',
-    cursor: 'pointer',
-    padding: '12px 24px',
-    borderRadius: 8,
-  },
-  btnHeroSecondary: {
-    fontSize: 14,
-    fontWeight: 500,
-    color: N_COLORS.onDark,
-    background: 'transparent',
-    border: '1px solid rgba(255,255,255,0.3)',
-    cursor: 'pointer',
-    padding: '12px 24px',
-    borderRadius: 8,
-  },
-  // MOCKUP
-  mockupWrap: { maxWidth: 900, margin: '0 auto', padding: '0 16px' },
-  mockupCard: {
-    background: N_COLORS.canvas,
-    borderRadius: '12px 12px 0 0',
-    border: '1px solid rgba(255,255,255,0.12)',
-    boxShadow: 'rgba(15,15,15,0.35) 0px 24px 64px -8px',
-    overflow: 'hidden',
-  },
-  mockupBar: {
-    background: '#f0eeec',
-    padding: '10px 14px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    borderBottom: `1px solid ${N_COLORS.hairline}`,
-  },
-  mockupDot: { width: 10, height: 10, borderRadius: '50%' },
-  mockupUrl: {
-    flex: 1,
-    background: N_COLORS.canvas,
-    borderRadius: 6,
-    padding: '4px 10px',
-    fontSize: 11,
-    color: N_COLORS.stone,
-    border: `1px solid ${N_COLORS.hairline}`,
-    maxWidth: 300,
-    margin: '0 auto',
-    textAlign: 'center',
-  },
-  mockupBody: {
-    padding: 16,
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4,1fr)',
-    gap: 10,
-    minHeight: 220,
-    background: N_COLORS.surfaceSoft,
-  },
-  kCol: {
-    background: N_COLORS.canvas,
-    borderRadius: 12,
-    border: `1px solid ${N_COLORS.hairline}`,
-    overflow: 'hidden',
-  },
-  kColHead: {
-    padding: '10px 12px',
-    fontSize: 11,
-    fontWeight: 600,
-    letterSpacing: '0.5px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    color: N_COLORS.charcoal,
-  },
-  kBadge: { fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 9999 },
-  kCards: { padding: 6, display: 'flex', flexDirection: 'column', gap: 6 },
-  kCard: {
-    background: N_COLORS.canvas,
-    border: `1px solid ${N_COLORS.hairline}`,
-    borderRadius: 8,
-    padding: '9px 10px',
-  },
-  kCardCompany: { fontSize: 12, fontWeight: 600, color: N_COLORS.ink, marginBottom: 2 },
-  kCardRole: { fontSize: 10, color: N_COLORS.slate },
-  kCardDays: { fontSize: 9, color: N_COLORS.stone, marginTop: 5 },
-  // LOGO WALL
-  logoWall: {
-    borderTop: `1px solid ${N_COLORS.hairline}`,
-    borderBottom: `1px solid ${N_COLORS.hairline}`,
-    padding: '18px 32px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 0,
-    overflow: 'hidden',
-  },
-  logoWallLabel: { fontSize: 12, color: N_COLORS.stone, fontWeight: 500, whiteSpace: 'nowrap', marginRight: 32 },
-  logoItem: { fontSize: 14, fontWeight: 600, color: N_COLORS.steel, whiteSpace: 'nowrap', marginRight: 40 },
-  // SECTION
-  section: { padding: '80px 32px' },
-  sectionCenter: { textAlign: 'center', maxWidth: 640, margin: '0 auto 56px' },
-  sectionEyebrow: { fontSize: 11, fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase', color: N_COLORS.primary, marginBottom: 12 },
-  sectionTitle: { fontSize: 'clamp(28px,4vw,44px)', fontWeight: 600, lineHeight: 1.15, letterSpacing: '-0.5px', color: N_COLORS.ink, marginBottom: 16 },
-  sectionSub: { fontSize: 16, color: N_COLORS.slate, lineHeight: 1.6 },
-  // FEATURES
-  featureGrid: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, maxWidth: 1100, margin: '0 auto' },
-  featCard: { borderRadius: 12, padding: 32, position: 'relative', overflow: 'hidden' },
-  featIcon: { width: 40, height: 40, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, fontSize: 20 },
-  featTitle: { fontSize: 18, fontWeight: 600, color: N_COLORS.charcoal, marginBottom: 8 },
-  featDesc: { fontSize: 14, color: N_COLORS.slate, lineHeight: 1.6 },
-  // STATS
-  statsStrip: {
-    background: N_COLORS.surface,
-    borderRadius: 16,
-    padding: 56,
-    maxWidth: 1100,
-    margin: '0 auto',
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3,1fr)',
-    gap: 40,
-  },
-  statItem: { textAlign: 'center' },
-  statNum: { fontSize: 48, fontWeight: 600, color: N_COLORS.ink, letterSpacing: '-1px', lineHeight: 1 },
-  statLabel: { fontSize: 14, color: N_COLORS.slate, marginTop: 8, lineHeight: 1.5 },
-  // STEPS
-  steps: { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 20, maxWidth: 1100, margin: '0 auto' },
-  step: { textAlign: 'center', padding: '24px 16px' },
-  stepNum: {
-    width: 44, height: 44, borderRadius: '50%', background: N_COLORS.primary,
-    color: '#fff', fontSize: 16, fontWeight: 600,
-    display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px',
-  },
-  stepTitle: { fontSize: 15, fontWeight: 600, color: N_COLORS.ink, marginBottom: 8 },
-  stepDesc: { fontSize: 13, color: N_COLORS.slate, lineHeight: 1.6 },
-  // TECH
-  techRow: { display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center', maxWidth: 700, margin: '0 auto' },
-  techBadge: {
-    display: 'flex', alignItems: 'center', gap: 7,
-    background: N_COLORS.canvas, border: `1px solid ${N_COLORS.hairline}`,
-    borderRadius: 9999, padding: '8px 16px', fontSize: 13, fontWeight: 500, color: N_COLORS.charcoal,
-  },
-  techDot: { width: 8, height: 8, borderRadius: '50%' },
-  // CTA
-  ctaSection: { background: N_COLORS.navy, color: N_COLORS.onDark, padding: '80px 32px', textAlign: 'center' },
-  ctaTitle: { fontSize: 'clamp(32px,5vw,52px)', fontWeight: 600, letterSpacing: '-1px', lineHeight: 1.1, marginBottom: 20 },
-  ctaSub: { fontSize: 16, color: N_COLORS.onDarkMuted, marginBottom: 40 },
-  // FOOTER
-  footer: {
-    background: N_COLORS.canvas, borderTop: `1px solid ${N_COLORS.hairline}`,
-    padding: '40px 32px 0', display: 'grid',
-    gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 32,
-  },
-  footerBrand: { fontSize: 15, fontWeight: 700, color: N_COLORS.ink, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 },
-  footerBrandIcon: { width: 24, height: 24, background: N_COLORS.ink, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 12 },
-  footerTagline: { fontSize: 13, color: N_COLORS.slate, lineHeight: 1.6, maxWidth: 240 },
-  footerColTitle: { fontSize: 11, fontWeight: 600, letterSpacing: '0.5px', color: N_COLORS.stone, textTransform: 'uppercase', marginBottom: 12 },
-  footerLinks: { listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6, padding: 0, margin: 0 },
-  footerLink: { fontSize: 13, color: N_COLORS.slate, textDecoration: 'none', cursor: 'pointer' },
-  footerBottom: {
-    borderTop: `1px solid ${N_COLORS.hairline}`,
-    padding: '16px 32px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  footerCopy: { fontSize: 12, color: N_COLORS.stone },
-};
-
-const KANBAN_COLUMNS = [
-  { label: 'Applied', badgeBg: '#dcecfa', badgeColor: '#185fa5', companies: [{ name: 'Razorpay', role: 'SDE-1 · Backend', days: '3 days ago' }, { name: 'Zepto', role: 'Full Stack Eng', days: '1 day ago' }] },
-  { label: 'Interview', badgeBg: '#fef7d6', badgeColor: '#793400', companies: [{ name: 'Groww', role: 'Frontend Eng', days: '5 days ago' }] },
-  { label: 'Offer', badgeBg: '#d9f3e1', badgeColor: '#0f6e56', companies: [{ name: 'Setu', role: 'Backend · 7 LPA', days: 'Offer received!' }] },
-  { label: 'Rejected', badgeBg: '#f0eeec', badgeColor: '#787671', companies: [{ name: 'Meesho', role: 'SDE-1', days: '8 days ago' }] },
+// ─── Kanban data for hero mockup ──────────────────────────────────────────────
+const MOCK_COLS = [
+  { label: 'Applied',   dot: T.accent,   cards: [{ co: 'Razorpay', role: 'SDE-1 · Backend' }, { co: 'Zepto', role: 'Full Stack' }] },
+  { label: 'Interview', dot: '#d4a017',  cards: [{ co: 'Groww', role: 'Frontend Eng' }] },
+  { label: 'Offer',     dot: T.success,  cards: [{ co: 'Setu', role: 'Backend · 7 LPA' }] },
+  { label: 'Rejected',  dot: '#c94a4a',  cards: [{ co: 'Meesho', role: 'SDE-1' }] },
 ];
 
 const FEATURES = [
-  { bg: N_COLORS.lavender, iconBg: '#d6b6f6', icon: '📋', title: 'Kanban Board', desc: 'Visual pipeline: Applied → Interview → Offer → Rejected. Click any card to edit status, notes, or URL.' },
-  { bg: N_COLORS.mint, iconBg: '#9FE1CB', icon: '🔒', title: 'Secure JWT Auth', desc: 'bcrypt-hashed passwords. Token persists across sessions — no repeated logins.' },
-  { bg: N_COLORS.peach, iconBg: '#f5c4a0', icon: '⚡', title: 'Auto-fill from URL', desc: 'Paste any job link. Claude extracts company, role, skills, and salary automatically.' },
-  { bg: N_COLORS.sky, iconBg: '#b5d4f4', icon: '📊', title: 'Stats Dashboard', desc: 'Live counts per stage. Track application velocity toward your target.' },
-  { bg: N_COLORS.rose, iconBg: '#f4c0d1', icon: '🤖', title: 'Resume Match Score', desc: 'Claude scores your resume vs JD, surfaces skill gaps, and tells you what to highlight.' },
-  { bg: N_COLORS.yellow, iconBg: '#fac775', icon: '💡', title: 'Smart Suggestions', desc: '"Follow up now", "Prep for interview" — AI tells you exactly what to do today.' },
+  { icon: '⬡', title: 'Kanban pipeline', desc: 'Applied → Interview → Offer → Rejected. Click any card to update status, notes, or URL.' },
+  { icon: '⚡', title: 'Auto-fill from URL', desc: 'Paste any job link. AI extracts company, role, skills, and salary in seconds.' },
+  { icon: '✦', title: 'Resume match score', desc: 'Score your resume against any JD. Surface skill gaps. Know what to highlight before interviews.' },
+  { icon: '◈', title: 'Smart suggestions', desc: '"Follow up now", "Prep for this one" — AI tells you exactly what to do today.' },
+  { icon: '⊕', title: 'Evaluate page', desc: 'Paste a JD and get a 10-dimension breakdown: stack fit, seniority, growth, compensation, and more.' },
+  { icon: '◎', title: 'Secure auth', desc: 'JWT + bcrypt. Your data is yours, token persists across sessions.' },
 ];
 
 const TECH = [
-  { label: 'React', color: '#61dafb' },
-  { label: 'Node.js', color: '#68a063' },
-  { label: 'MongoDB Atlas', color: '#47a248' },
-  { label: 'Express', color: '#000' },
-  { label: 'Claude API', color: '#5645d4' },
-  { label: 'JWT + bcryptjs', color: '#e34c26' },
-  { label: 'Vercel', color: '#000' },
-  { label: 'Render', color: '#46e3b7' },
+  'React', 'Node.js', 'MongoDB Atlas', 'Express',
+  'Claude API', 'Gemini API', 'JWT + bcrypt', 'Vercel · Render',
 ];
+
+const STEPS = [
+  { n: '01', title: 'Register',          desc: 'Create an account. JWT issued instantly.' },
+  { n: '02', title: 'Add applications',  desc: 'Paste a URL for auto-fill, or add manually.' },
+  { n: '03', title: 'Evaluate & score',  desc: 'Score your resume vs JD. See the 10-dimension breakdown.' },
+  { n: '04', title: 'Act on insights',   desc: 'Follow-up prompts, prep reminders — what to do today.' },
+];
+
+// ─── Shared nav ───────────────────────────────────────────────────────────────
+function Logo() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect width="20" height="20" rx="5" fill={T.accent}/>
+      <path d="M5 14 L10 6 L15 14" stroke="#fff" strokeWidth="1.8" strokeLinejoin="round" fill="none"/>
+    </svg>
+  );
+}
 
 export default function Landing() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [stats, setStats] = useState({ applied: 0, interview: 0, offer: 0, rejected: 0 });
+  const [liveStats, setLiveStats] = useState(null);
 
   useEffect(() => {
-    // If already logged in, fetch real stats for hero
     if (user) {
       axios.get(`${process.env.REACT_APP_API_URL}/api/applications`)
         .then(res => {
           const apps = res.data;
-          setStats({
-            applied: apps.filter(a => a.status === 'Applied').length,
+          setLiveStats({
+            total:     apps.length,
+            applied:   apps.filter(a => a.status === 'Applied').length,
             interview: apps.filter(a => a.status === 'Interview').length,
-            offer: apps.filter(a => a.status === 'Offer').length,
-            rejected: apps.filter(a => a.status === 'Rejected').length,
+            offer:     apps.filter(a => a.status === 'Offer').length,
           });
         })
         .catch(() => {});
     }
   }, [user]);
 
-  const totalApps = stats.applied + stats.interview + stats.offer + stats.rejected;
-
   return (
-    <div style={styles.root}>
-      {/* Google Font */}
+    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: T.canvas, color: T.ink, overflowX: 'hidden', margin: 0, padding: 0 }}>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+      <style>{`
+        * { box-sizing: border-box; }
+        body { margin: 0; }
+        .lnd-navlink:hover { color: ${T.inkMuted} !important; }
+        .lnd-feat:hover { border-color: ${T.hairlineStrong} !important; background: ${T.s2} !important; }
+        .lnd-btn-p:hover  { background: ${T.accentHover} !important; }
+        .lnd-btn-s:hover  { border-color: ${T.hairlineStrong} !important; color: ${T.ink} !important; }
+      `}</style>
 
-      {/* NAV */}
-      <nav style={styles.nav}>
-        <div style={styles.navLogo} onClick={() => navigate('/')}>
-          <div style={styles.navLogoIcon}>JT</div>
-          JobTracker
+      {/* ── NAV ── */}
+      <nav style={{
+        position: 'sticky', top: 0, zIndex: 100,
+        background: T.s1 + 'f0',
+        backdropFilter: 'blur(10px)',
+        borderBottom: `1px solid ${T.hairline}`,
+        height: 52, display: 'flex', alignItems: 'center',
+        padding: '0 32px', gap: 0,
+      }}>
+        <div onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginRight: 36 }}>
+          <Logo />
+          <span style={{ fontSize: 14, fontWeight: 600, color: T.ink, letterSpacing: '-0.3px' }}>Runway</span>
         </div>
-        <div style={styles.navLinks}>
-          {['Features', 'AI Tools', 'How it works', 'Tech Stack'].map(l => (
-            <button key={l} style={styles.navLink}>{l}</button>
+
+        <div style={{ display: 'flex', gap: 2, flex: 1 }}>
+          {['Features', 'How it works', 'Tech stack'].map(l => (
+            <button key={l} className="lnd-navlink"
+              style={{ fontSize: 13, color: T.inkSubtle, background: 'transparent', border: 'none', cursor: 'pointer', padding: '5px 10px', borderRadius: 6, transition: 'color 0.12s' }}>
+              {l}
+            </button>
           ))}
         </div>
-        <div style={styles.navRight}>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {user ? (
-            <button style={styles.btnPrimary} onClick={() => navigate('/dashboard')}>Go to Dashboard →</button>
+            <button className="lnd-btn-p"
+              onClick={() => navigate('/dashboard')}
+              style={{ fontSize: 13, fontWeight: 500, color: '#fff', background: T.accent, border: 'none', cursor: 'pointer', padding: '7px 14px', borderRadius: 7, transition: 'background 0.12s' }}>
+              Go to Pipeline →
+            </button>
           ) : (
             <>
-              <button style={styles.btnGhost} onClick={() => navigate('/login')}>Log in</button>
-              <button style={styles.btnPrimary} onClick={() => navigate('/register')}>Get started free</button>
+              <button className="lnd-btn-s"
+                onClick={() => navigate('/login')}
+                style={{ fontSize: 13, color: T.inkSubtle, background: 'transparent', border: `1px solid ${T.hairline}`, cursor: 'pointer', padding: '7px 14px', borderRadius: 7, transition: 'border-color 0.12s, color 0.12s' }}>
+                Log in
+              </button>
+              <button className="lnd-btn-p"
+                onClick={() => navigate('/register')}
+                style={{ fontSize: 13, fontWeight: 500, color: '#fff', background: T.accent, border: 'none', cursor: 'pointer', padding: '7px 14px', borderRadius: 7, transition: 'background 0.12s' }}>
+                Get started →
+              </button>
             </>
           )}
         </div>
       </nav>
 
-      {/* HERO */}
-      <section style={styles.hero}>
-        <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice">
-          <circle cx="80" cy="80" r="10" fill="#f5d75e" opacity="0.85" />
-          <circle cx="160" cy="200" r="7" fill="#ff64c8" opacity="0.7" />
-          <circle cx="50" cy="320" r="12" fill="#2a9d99" opacity="0.65" />
-          <circle cx="200" cy="440" r="8" fill="#5645d4" opacity="0.7" />
-          <circle cx="1100" cy="90" r="9" fill="#ff64c8" opacity="0.75" />
-          <circle cx="1160" cy="240" r="11" fill="#f5d75e" opacity="0.8" />
-          <circle cx="1080" cy="380" r="7" fill="#1aae39" opacity="0.65" />
-          <circle cx="1140" cy="490" r="13" fill="#5645d4" opacity="0.5" />
-          <line x1="80" y1="80" x2="160" y2="200" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-          <line x1="160" y1="200" x2="50" y2="320" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-          <line x1="1100" y1="90" x2="1160" y2="240" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-          <line x1="1160" y1="240" x2="1080" y2="380" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-        </svg>
+      {/* ── HERO ── */}
+      <section style={{ padding: '96px 32px 0', textAlign: 'center', position: 'relative' }}>
+        {/* Subtle grid pattern */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          backgroundImage: `linear-gradient(${T.hairline} 1px, transparent 1px), linear-gradient(90deg, ${T.hairline} 1px, transparent 1px)`,
+          backgroundSize: '48px 48px',
+          maskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%)',
+          opacity: 0.4,
+        }} />
 
         <div style={{ position: 'relative' }}>
-          <div style={styles.heroBadge}>
-            <span style={styles.heroBadgeDot} />
-            AI-Powered · Full-Stack Project
+          {/* Badge */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: T.s1, border: `1px solid ${T.hairline}`, borderRadius: 9999, padding: '5px 14px', fontSize: 11, fontWeight: 500, color: T.inkSubtle, letterSpacing: '0.3px', marginBottom: 32 }}>
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: T.success, display: 'inline-block' }} />
+            AI-Powered Job Tracker · Full-Stack Project
           </div>
-          <h1 style={styles.heroTitle}>
+
+          {/* Headline */}
+          <h1 style={{ fontSize: 'clamp(38px, 6vw, 72px)', fontWeight: 600, lineHeight: 1.05, letterSpacing: 'clamp(-1.5px, -0.04em, -3px)', marginBottom: 24, maxWidth: 700, marginLeft: 'auto', marginRight: 'auto' }}>
             Track every job.<br />
-            <span style={styles.heroTitleAccent}>Land the one</span> that matters.
+            <span style={{ color: T.accent }}>Land the one</span> that matters.
           </h1>
-          <p style={styles.heroSub}>
-            A Kanban-style tracker with AI resume matching, smart follow-up suggestions, and auto-fill from any job URL.
+
+          {/* Sub */}
+          <p style={{ fontSize: 17, color: T.inkSubtle, lineHeight: 1.65, maxWidth: 480, margin: '0 auto 44px' }}>
+            Kanban pipeline with AI resume matching, 10-dimension job scoring, and auto-fill from any job URL.
           </p>
-          <div style={styles.heroBtns}>
-            <button style={styles.btnHeroPrimary} onClick={() => navigate('/register')}>
+
+          {/* CTAs */}
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 72 }}>
+            <button className="lnd-btn-p"
+              onClick={() => navigate('/register')}
+              style={{ fontSize: 14, fontWeight: 500, color: '#fff', background: T.accent, border: 'none', cursor: 'pointer', padding: '10px 22px', borderRadius: 8, transition: 'background 0.12s' }}>
               Get started free →
             </button>
-            <button style={styles.btnHeroSecondary} onClick={() => navigate('/login')}>
+            <button className="lnd-btn-s"
+              onClick={() => navigate('/login')}
+              style={{ fontSize: 14, fontWeight: 500, color: T.inkSubtle, background: 'transparent', border: `1px solid ${T.hairline}`, cursor: 'pointer', padding: '10px 22px', borderRadius: 8, transition: 'border-color 0.12s, color 0.12s' }}>
               Log in
             </button>
           </div>
 
-          {/* App Mockup */}
-          <div style={styles.mockupWrap}>
-            <div style={styles.mockupCard}>
-              <div style={styles.mockupBar}>
-                <div style={{ ...styles.mockupDot, background: '#ff5f57' }} />
-                <div style={{ ...styles.mockupDot, background: '#febc2e' }} />
-                <div style={{ ...styles.mockupDot, background: '#28c840' }} />
-                <div style={styles.mockupUrl}>jobtracker.vercel.app/dashboard</div>
+          {/* ── App mockup ── */}
+          <div style={{ maxWidth: 920, margin: '0 auto', padding: '0 16px' }}>
+            <div style={{ background: T.s1, border: `1px solid ${T.hairline}`, borderRadius: '14px 14px 0 0', overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.6)' }}>
+              {/* Browser chrome */}
+              <div style={{ background: T.s2, borderBottom: `1px solid ${T.hairline}`, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 5 }}>
+                  {['#ff5f57', '#febc2e', '#28c840'].map(c => (
+                    <div key={c} style={{ width: 9, height: 9, borderRadius: '50%', background: c }} />
+                  ))}
+                </div>
+                <div style={{ flex: 1, background: T.s3, borderRadius: 5, padding: '3px 10px', fontSize: 11, color: T.inkTertiary, maxWidth: 280, margin: '0 auto', textAlign: 'center', border: `1px solid ${T.hairline}` }}>
+                  runway.vercel.app/dashboard
+                </div>
               </div>
-              <div style={styles.mockupBody}>
-                {KANBAN_COLUMNS.map(col => (
-                  <div key={col.label} style={styles.kCol}>
-                    <div style={styles.kColHead}>
-                      {col.label}
-                      <span style={{ ...styles.kBadge, background: col.badgeBg, color: col.badgeColor }}>
-                        {user ? stats[col.label.toLowerCase()] : col.companies.length}
-                      </span>
-                    </div>
-                    <div style={styles.kCards}>
-                      {col.companies.map(c => (
-                        <div key={c.name} style={styles.kCard}>
-                          <div style={styles.kCardCompany}>{c.name}</div>
-                          <div style={styles.kCardRole}>{c.role}</div>
-                          <div style={styles.kCardDays}>{c.days}</div>
+
+              {/* Kanban preview */}
+              <div style={{ padding: 14, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, background: T.canvas }}>
+                {MOCK_COLS.map(col => {
+                  const count = liveStats
+                    ? (liveStats[col.label.toLowerCase()] ?? col.cards.length)
+                    : col.cards.length;
+                  return (
+                    <div key={col.label} style={{ background: T.s1, border: `1px solid ${T.hairline}`, borderRadius: 10, overflow: 'hidden' }}>
+                      <div style={{ padding: '9px 11px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${T.hairline}` }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <div style={{ width: 5, height: 5, borderRadius: '50%', background: col.dot }} />
+                          <span style={{ fontSize: 11, fontWeight: 500, color: T.inkSubtle }}>{col.label}</span>
                         </div>
-                      ))}
+                        <span style={{ fontSize: 10, color: T.inkTertiary }}>{count}</span>
+                      </div>
+                      <div style={{ padding: 7, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                        {col.cards.map(c => (
+                          <div key={c.co} style={{ background: T.s2, border: `1px solid ${T.hairline}`, borderRadius: 7, padding: '8px 9px' }}>
+                            <div style={{ fontSize: 11, fontWeight: 600, color: T.ink }}>{c.co}</div>
+                            <div style={{ fontSize: 9, color: T.inkTertiary, marginTop: 2 }}>{c.role}</div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* LOGO WALL */}
-      <div style={styles.logoWall}>
-        <span style={styles.logoWallLabel}>Built with</span>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {['React', 'Node.js', 'MongoDB', 'Express', 'JWT Auth', 'Claude API', 'Vercel', 'Render'].map(t => (
-            <span key={t} style={styles.logoItem}>{t}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* FEATURES */}
-      <section style={{ ...styles.section, background: N_COLORS.surfaceSoft }}>
-        <div style={styles.sectionCenter}>
-          <div style={styles.sectionEyebrow}>Features</div>
-          <h2 style={styles.sectionTitle}>Everything you need to land your next role</h2>
-          <p style={styles.sectionSub}>From tracking applications to AI-powered insights — built for Indian CS grads targeting product startups.</p>
-        </div>
-        <div style={styles.featureGrid}>
-          {FEATURES.map(f => (
-            <div key={f.title} style={{ ...styles.featCard, background: f.bg }}>
-              <div style={{ ...styles.featIcon, background: f.iconBg }}>{f.icon}</div>
-              <div style={styles.featTitle}>{f.title}</div>
-              <div style={styles.featDesc}>{f.desc}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* STATS */}
-      <section style={styles.section}>
-        <div style={styles.statsStrip}>
-          <div style={styles.statItem}>
-            <div style={styles.statNum}>{user && totalApps > 0 ? totalApps : 9}</div>
-            <div style={styles.statLabel}>
-              {user && totalApps > 0 ? 'Your active applications' : 'API endpoints — fully tested and production-ready'}
-            </div>
-          </div>
-          <div style={styles.statItem}>
-            <div style={styles.statNum}>3</div>
-            <div style={styles.statLabel}>AI features powered by Claude — auto-fill, match scoring, smart suggestions</div>
-          </div>
-          <div style={styles.statItem}>
-            <div style={styles.statNum}>5–8<span style={{ fontSize: 28 }}>LPA</span></div>
-            <div style={styles.statLabel}>Target salary range — built for product startups on Wellfound</div>
-          </div>
-        </div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section style={{ ...styles.section, background: N_COLORS.surfaceSoft }}>
-        <div style={styles.sectionCenter}>
-          <div style={styles.sectionEyebrow}>How it works</div>
-          <h2 style={styles.sectionTitle}>Up and running in minutes</h2>
-        </div>
-        <div style={styles.steps}>
-          {[
-            { n: '1', title: 'Register', desc: 'Create an account. JWT issued instantly — your data is yours, secured with bcrypt.' },
-            { n: '2', title: 'Add applications', desc: 'Paste a job URL and let AI auto-fill, or add manually. It lands in your Applied column.' },
-            { n: '3', title: 'Get AI insights', desc: 'Score your resume against the JD. See skill gaps. Know what to say in interviews.' },
-            { n: '4', title: 'Act on suggestions', desc: 'Claude tells you who to follow up with, who to prep for, and what to do today.' },
-          ].map(s => (
-            <div key={s.n} style={styles.step}>
-              <div style={styles.stepNum}>{s.n}</div>
-              <div style={styles.stepTitle}>{s.title}</div>
-              <div style={styles.stepDesc}>{s.desc}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* TECH STACK */}
-      <section style={{ ...styles.section, textAlign: 'center' }}>
-        <div style={styles.sectionCenter}>
-          <div style={styles.sectionEyebrow}>Tech Stack</div>
-          <h2 style={styles.sectionTitle}>Production-grade, portfolio-ready</h2>
-          <p style={styles.sectionSub}>Modern MERN stack with AI, deployed on free tiers — your first shipped product.</p>
-        </div>
-        <div style={styles.techRow}>
+      {/* ── TECH STRIP ── */}
+      <div style={{ borderTop: `1px solid ${T.hairline}`, borderBottom: `1px solid ${T.hairline}`, padding: '16px 32px', display: 'flex', alignItems: 'center', gap: 0, overflowX: 'auto', marginTop: 0 }}>
+        <span style={{ fontSize: 11, color: T.inkTertiary, fontWeight: 500, whiteSpace: 'nowrap', marginRight: 28 }}>Built with</span>
+        <div style={{ display: 'flex', gap: 0, flexWrap: 'nowrap' }}>
           {TECH.map(t => (
-            <div key={t.label} style={styles.techBadge}>
-              <div style={{ ...styles.techDot, background: t.color }} />
-              {t.label}
+            <span key={t} style={{ fontSize: 13, fontWeight: 500, color: T.inkTertiary, whiteSpace: 'nowrap', marginRight: 32 }}>{t}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* ── FEATURES ── */}
+      <section style={{ padding: '96px 32px' }}>
+        <div style={{ textAlign: 'center', maxWidth: 560, margin: '0 auto 56px' }}>
+          <div style={{ fontSize: 11, fontWeight: 500, color: T.accent, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 14 }}>Features</div>
+          <h2 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 600, lineHeight: 1.15, letterSpacing: '-0.8px', color: T.ink, marginBottom: 14 }}>
+            Everything to land your next role
+          </h2>
+          <p style={{ fontSize: 15, color: T.inkSubtle, lineHeight: 1.6 }}>
+            Built for CS grads targeting product startups. From tracking to AI scoring in one tool.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, maxWidth: 1100, margin: '0 auto' }}>
+          {FEATURES.map(f => (
+            <div key={f.title} className="lnd-feat"
+              style={{ background: T.s1, border: `1px solid ${T.hairline}`, borderRadius: 12, padding: '24px', transition: 'background 0.12s, border-color 0.12s', cursor: 'default' }}>
+              <div style={{ fontSize: 18, marginBottom: 16, color: T.accent }}>{f.icon}</div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: T.ink, marginBottom: 8, letterSpacing: '-0.2px' }}>{f.title}</div>
+              <div style={{ fontSize: 13, color: T.inkSubtle, lineHeight: 1.65 }}>{f.desc}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* CTA */}
-      <section style={styles.ctaSection}>
-        <svg style={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0, pointerEvents: 'none' }} viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice">
-          <circle cx="100" cy="80" r="8" fill="#f5d75e" opacity="0.5" />
-          <circle cx="1100" cy="320" r="10" fill="#ff64c8" opacity="0.45" />
-        </svg>
-        <div style={{ position: 'relative' }}>
-          <h2 style={styles.ctaTitle}>Built to impress.<br />Deployed to ship.</h2>
-          <p style={styles.ctaSub}>Full-stack AI app with auth, CRUD, and LLM features. The portfolio project that gets you the interview.</p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            <button style={styles.btnHeroPrimary} onClick={() => navigate('/register')}>Start tracking →</button>
-            <button style={styles.btnHeroSecondary} onClick={() => navigate('/login')}>Log in</button>
+      {/* ── STATS ── */}
+      <section style={{ padding: '0 32px 96px' }}>
+        <div style={{ background: T.s1, border: `1px solid ${T.hairline}`, borderRadius: 16, padding: '48px 56px', maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 40 }}>
+          {[
+            { n: liveStats ? liveStats.total : '9', label: liveStats ? 'Applications in your pipeline' : 'API endpoints — production-ready' },
+            { n: '3',          label: 'AI features — auto-fill, resume match, smart suggestions' },
+            { n: '10',         label: 'Dimensions scored per job — stack fit, growth, compensation & more' },
+          ].map((s, i) => (
+            <div key={i} style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 48, fontWeight: 600, color: T.ink, letterSpacing: '-2px', lineHeight: 1 }}>{s.n}</div>
+              <div style={{ fontSize: 13, color: T.inkSubtle, marginTop: 10, lineHeight: 1.5 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section style={{ padding: '0 32px 96px', borderTop: `1px solid ${T.hairline}` }}>
+        <div style={{ textAlign: 'center', maxWidth: 560, margin: '0 auto', padding: '80px 0 56px' }}>
+          <div style={{ fontSize: 11, fontWeight: 500, color: T.accent, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 14 }}>How it works</div>
+          <h2 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 600, lineHeight: 1.15, letterSpacing: '-0.8px', color: T.ink }}>
+            Up and running in minutes
+          </h2>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, maxWidth: 1100, margin: '0 auto' }}>
+          {STEPS.map(s => (
+            <div key={s.n} style={{ padding: '24px 20px', borderLeft: `1px solid ${T.hairline}` }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: T.inkTertiary, letterSpacing: '1px', marginBottom: 14 }}>{s.n}</div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: T.ink, marginBottom: 8, letterSpacing: '-0.2px' }}>{s.title}</div>
+              <div style={{ fontSize: 13, color: T.inkSubtle, lineHeight: 1.65 }}>{s.desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── CTA BANNER ── */}
+      <section style={{ padding: '0 32px 96px' }}>
+        <div style={{ background: T.s1, border: `1px solid ${T.hairline}`, borderRadius: 16, padding: '64px 48px', maxWidth: 1100, margin: '0 auto', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+          {/* Accent glow */}
+          <div style={{ position: 'absolute', top: -80, left: '50%', transform: 'translateX(-50%)', width: 400, height: 200, background: T.accent, opacity: 0.06, borderRadius: '50%', filter: 'blur(60px)', pointerEvents: 'none' }} />
+          <div style={{ position: 'relative' }}>
+            <h2 style={{ fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: 600, letterSpacing: '-1.5px', lineHeight: 1.1, marginBottom: 16, color: T.ink }}>
+              Built to ship.<br />Designed to impress.
+            </h2>
+            <p style={{ fontSize: 15, color: T.inkSubtle, marginBottom: 36, lineHeight: 1.6, maxWidth: 480, margin: '0 auto 36px' }}>
+              Full-stack AI app with auth, CRUD, and LLM features. The portfolio project that gets you the interview.
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button className="lnd-btn-p"
+                onClick={() => navigate('/register')}
+                style={{ fontSize: 14, fontWeight: 500, color: '#fff', background: T.accent, border: 'none', cursor: 'pointer', padding: '10px 22px', borderRadius: 8, transition: 'background 0.12s' }}>
+                Start tracking →
+              </button>
+              <button className="lnd-btn-s"
+                onClick={() => navigate('/login')}
+                style={{ fontSize: 14, fontWeight: 500, color: T.inkSubtle, background: 'transparent', border: `1px solid ${T.hairline}`, cursor: 'pointer', padding: '10px 22px', borderRadius: 8, transition: 'border-color 0.12s, color 0.12s' }}>
+                Log in
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer style={styles.footer}>
-        <div>
-          <div style={styles.footerBrand}>
-            <div style={styles.footerBrandIcon}>JT</div>
-            JobTracker
+      {/* ── FOOTER ── */}
+      <footer style={{ borderTop: `1px solid ${T.hairline}`, padding: '48px 32px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 40 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                <rect width="20" height="20" rx="5" fill={T.accent}/>
+                <path d="M5 14 L10 6 L15 14" stroke="#fff" strokeWidth="1.8" strokeLinejoin="round" fill="none"/>
+              </svg>
+              <span style={{ fontSize: 14, fontWeight: 600, color: T.ink, letterSpacing: '-0.3px' }}>Runway</span>
+            </div>
+            <p style={{ fontSize: 13, color: T.inkTertiary, lineHeight: 1.6, maxWidth: 220, margin: 0 }}>
+              AI-powered job tracker built by Atharva Kadam, CS grad from Maharashtra targeting product startups.
+            </p>
           </div>
-          <p style={styles.footerTagline}>An AI-powered job application tracker built by a CS grad from Maharashtra targeting 5–8 LPA at Indian product startups.</p>
+          {[
+            { title: 'Product', links: ['Pipeline', 'Evaluate', 'Resume Match', 'AI Suggestions'] },
+            { title: 'Project', links: ['GitHub', 'README', 'API Docs', 'Postman Collection'] },
+            { title: 'Connect', links: ['LinkedIn', 'Wellfound', 'Portfolio', 'Email'] },
+          ].map(col => (
+            <div key={col.title}>
+              <div style={{ fontSize: 11, fontWeight: 500, color: T.inkTertiary, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 14 }}>{col.title}</div>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8, padding: 0, margin: 0 }}>
+                {col.links.map(l => (
+                  <li key={l}><span style={{ fontSize: 13, color: T.inkSubtle, cursor: 'pointer' }}>{l}</span></li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        {[
-          { title: 'Product', links: ['Dashboard', 'AI Features', 'Kanban Board', 'Resume Match'] },
-          { title: 'Project', links: ['GitHub Repo', 'README', 'API Docs', 'Postman Collection'] },
-          { title: 'Connect', links: ['LinkedIn', 'Wellfound', 'Portfolio', 'Email'] },
-        ].map(col => (
-          <div key={col.title}>
-            <div style={styles.footerColTitle}>{col.title}</div>
-            <ul style={styles.footerLinks}>
-              {col.links.map(l => <li key={l}><span style={styles.footerLink}>{l}</span></li>)}
-            </ul>
-          </div>
-        ))}
+        <div style={{ borderTop: `1px solid ${T.hairline}`, marginTop: 48, paddingTop: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: 1100, margin: '48px auto 0' }}>
+          <span style={{ fontSize: 12, color: T.inkTertiary }}>© 2025 Atharva Kadam — CS Graduate, Maharashtra</span>
+          <span style={{ fontSize: 12, color: T.inkTertiary }}>React · Node · MongoDB · Claude API</span>
+        </div>
       </footer>
-      <div style={styles.footerBottom}>
-        <span style={styles.footerCopy}>© 2025 Atharva Kulkarni — CS Graduate, Maharashtra</span>
-        <span style={styles.footerCopy}>React · Node · MongoDB · Claude API</span>
-      </div>
     </div>
   );
 }

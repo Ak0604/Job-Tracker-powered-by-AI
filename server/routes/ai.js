@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const User = require('../models/UserModel');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -30,7 +31,6 @@ router.post('/autofill', auth, async (req, res) => {
   if (!url) return res.status(400).json({ error: 'URL is required' });
 
   try {
-    // Fetch the page HTML
     const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
     let pageText = '';
     try {
@@ -39,7 +39,6 @@ router.post('/autofill', auth, async (req, res) => {
         timeout: 8000,
       });
       const html = await response.text();
-      // Strip HTML tags to get plain text
       pageText = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 6000);
     } catch {
       return res.status(422).json({ error: 'Could not fetch the job page. Try adding the job manually.' });
@@ -65,8 +64,6 @@ If a field cannot be determined, use an empty string.
 `.trim();
 
     const text = await ask(prompt);
-
-    // Strip markdown code fences if Gemini adds them
     const clean = text.replace(/```json|```/g, '').trim();
     const data = JSON.parse(clean);
 
@@ -79,14 +76,31 @@ If a field cannot be determined, use an empty string.
 
 // ---------------------------------------------------------------
 // POST /api/ai/match
-// Body: { jd: string, resume: string }
-// Scores resume against job description
+// Body: { jd: string, resume?: string }
+// If resume is not provided in body, falls back to stored resume on user profile.
 // ---------------------------------------------------------------
 router.post('/match', auth, async (req, res) => {
-  const { jd, resume } = req.body;
-  if (!jd || !resume) return res.status(400).json({ error: 'Both job description and resume are required' });
+  const { jd, resume: resumeFromBody } = req.body;
+  if (!jd) return res.status(400).json({ error: 'Job description is required' });
 
   try {
+    // Resolve resume: use body first, fall back to stored profile resume
+    let resume = resumeFromBody;
+    let resumeSource = 'provided';
+
+    if (!resume || resume.trim().length < 50) {
+      const user = await User.findById(req.user.id).select('resumeText');
+      if (user && user.resumeText) {
+        resume = user.resumeText;
+        resumeSource = 'profile';
+      } else {
+        return res.status(400).json({
+          error: 'No resume found. Please upload your resume in your profile first.',
+          code: 'NO_RESUME',
+        });
+      }
+    }
+
     const prompt = `
 You are an expert technical recruiter and career coach helping a CS graduate in India target product startups (5–8 LPA range).
 
@@ -121,7 +135,7 @@ VERDICT: [1-2 sentence honest summary — should they apply, and what's their re
 `.trim();
 
     const result = await ask(prompt);
-    res.json({ result });
+    res.json({ result, resumeSource });
   } catch (err) {
     console.error('Match error:', err.message);
     res.status(500).json({ error: 'Match scoring failed. Please try again.' });
@@ -140,7 +154,6 @@ router.post('/suggest', auth, async (req, res) => {
   }
 
   try {
-    // Build a compact summary of each application
     const appSummary = applications.map(a => {
       const days = Math.floor((Date.now() - new Date(a.createdAt)) / 86400000);
       return `- ${a.company} | ${a.role} | Status: ${a.status} | Applied ${days} day(s) ago${a.notes ? ` | Notes: ${a.notes.slice(0, 80)}` : ''}`;

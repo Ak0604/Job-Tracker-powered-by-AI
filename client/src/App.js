@@ -6,6 +6,8 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+import Evaluate from './pages/Evaluate';
 
 export default function App() {
   return (
@@ -25,6 +27,26 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected evaluate */}
+          <Route
+            path="/evaluate"
+            element={
+              <ProtectedRoute>
+                <Evaluate />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected profile */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

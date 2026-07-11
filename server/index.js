@@ -11,6 +11,7 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/applications', require('./routes/applications'));
 app.use('/api/ai', require('./routes/ai'));
+app.use('/api/user', require('./routes/user'));   // ← new: resume upload/fetch
 
 app.get('/', (req, res) => res.json({ status: 'Job Tracker API running' }));
 
